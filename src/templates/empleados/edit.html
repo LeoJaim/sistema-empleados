@@ -22,6 +22,11 @@
                 </div>
                 <div class="form-group">
                     <label for="foto">Foto</label>
+                    <br>
+                    <img class = "img-thumbnail" width = 100 src = "{{url_for('uploads',nombreFoto = empleado[3])}}" alt="">
+                    <br>
+                    <br>
+                    <br>
                     <input type="file" class="form-control" id="foto" name="foto" value="{{empleado[3]}}">
                 </div>
                 <br>

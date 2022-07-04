@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title> Sistema de Empleados y Nominas </title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!--link rel="stylesheet" href="{{url_for('static', filename='bootstrap.css')}}"-->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<link rel="shortcut icon" href="#">
-<body>
-    <div id="container">
-        <table class="table table-bordered">
+{% include 'header.html' %}
+    <!--div id="container"-->
+        <table class="table table-bordered" >
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Legajo</th>
@@ -25,9 +16,10 @@
                         <td>{{empleado[0]}}</td>
                         <td>{{empleado[1]}}</td>
                         <td>{{empleado[2]}}</td>
-                        <td><img class="img-thumbnail" width="100" src="uploads/{{empleado[3]}}" alt="">
+                        <td> 
+                            <img class="img-thumbnail" width="100" src="{{url_for('uploads',nombreFoto=empleado[3])}}" alt="">
                         </td>
-                        <td><a href= "/edit/{{empleado[0]}}">Editar</a> || <a href= "/delete/{{empleado[0]}}"> Borrar</a></td>
+                        <td><a class = "btn btn-warning" href= "/edit/{{empleado[0]}}">Editar</a>  <a class = "btn btn-danger" href= "/delete/{{empleado[0]}}"> Borrar</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -35,6 +27,6 @@
         <br>
         <a href="alta_emp" class="btn btn-primary">Nuevo Empleado</a>
         <a href="/" class="btn btn-primary">Regresar</a>
-    </div>
-</body>
-</html>
+    <!--/div-->
+
+{% include 'footer.html' %}

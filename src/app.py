@@ -1,29 +1,32 @@
-from sqlite3 import Cursor
 from flask import Flask
-from flask import render_template
-from flask import request
-from flask import redirect
+from flask import render_template,request,redirect,url_for
+from flask import send_from_directory,flash
+#from sqlite3 import Cursor
 from flaskext.mysql import MySQL
 from datetime import datetime 
 import os
-from flask import send_from_directory,url_for
+
 
 app = Flask(__name__)
+
+app.secret_key = 'super secret key'
+
 mysql = MySQL()
 
+#Variables de entorno para la conexion a la base de datos
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'Minolta10*'
 app.config['MYSQL_DATABASE_DB'] = 'empleados'
+#Inicializo la conexion a la base de datos
 mysql.init_app(app)
 
-FOLDER = os.path.join('uploads')
-app.config['FOLDER']=FOLDER
+CARPETA = os.path.join('uploads')
+app.config['CARPETA']=CARPETA
 
-@app.route('/uploads/<filname>')
-def uploads(filname):
-    return send_from_directory(app.config['FOLDER'], filname)
-
+@app.route('/uploads/<nombreFoto>', methods=['GET'],endpoint='uploads')
+def uploads(nombreFoto):
+    return send_from_directory(app.config['CARPETA'], nombreFoto)
 @app.route('/')
 def index():
     conn=mysql.connect()
@@ -44,11 +47,11 @@ def create():
     _correo = request.form['correo']
     _foto = request.files['foto']
     now = datetime.now()
-    tiempo = now.strftime("%Y-%m-%d %H:%M:%S")
+    tiempo = now.strftime("%Y%H%M%S")
     if _foto.filename != '':
         newNamePhoto = tiempo + _foto.filename
         _foto.save("uploads/" + newNamePhoto)
-    else: newNamePhoto = 'default.png'
+    else: newNamePhoto = 'default.jpg'
     
     conn=mysql.connect()
     cursor=conn.cursor()
@@ -85,17 +88,15 @@ def update():
     conn.commit()
     #Trato la foto específicamente
     now = datetime.now()
-    tiempo = now.strftime("%Y-%m-%d %H:%M:%S")
+    tiempo = now.strftime("%Y%H%M%S")
     if _foto.filename != '':
-        newNamePhoto = tiempo + _foto.filename
-        _foto.save("uploads/" + newNamePhoto)
+        nuevoNombreFoto = tiempo + _foto.filename
+        _foto.save("uploads/" + nuevoNombreFoto)
         cursor.execute("SELECT foto FROM empleados WHERE id=%s", id)
         row = cursor.fetchall()
-        try: 
-            os.remove(os.path.join(app.config['FOLDER'], row[0][0]))
-        except:
-            pass
-        cursor.execute("UPDATE empleados SET foto=%s WHERE id=%s", (newNamePhoto, id))
+        if row[0][0] != 'default.jpg':
+            os.remove(os.path.join(app.config['CARPETA'], row[0][0]))
+        cursor.execute("UPDATE empleados SET foto=%s WHERE id=%s", (nuevoNombreFoto, id))
         conn.commit()
     return redirect('/')
 
@@ -108,11 +109,13 @@ def delete(id):
     #Borro la foto
     cursor.execute("SELECT foto FROM empleados WHERE id=%s", id)
     row = cursor.fetchall()
-    if row.count != 0:
+    if row[0][0] != "default.jpg":
         try: 
-            os.remove(os.path.join(app.config['FOLDER'], row[0][0]))
+            os.remove(os.path.join(app.config['CARPETA'], row[0][0]))
         except:
-            pass
+            flash('No se pudo borrar la foto o no tenía foto el empleado')
+    else:
+        flash('No tenía foto el empleado')
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/')
