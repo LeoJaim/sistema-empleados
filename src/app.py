@@ -40,6 +40,8 @@ def index():
 def alta_emp():
     return render_template('empleados/create.html')
 
+
+
 @app.route('/create', methods=['POST'])
 def create():
     _nombre = request.form['nombre']
@@ -130,6 +132,29 @@ def inactive(id):
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/')
+
+
+@app.route('/ina_emp')
+def inactive_emp():
+    conn=mysql.connect()
+    cursor=conn.cursor()
+    
+    sql = "SELECT id,nombre,correo,foto FROM empleados where estado=0"
+    cursor.execute(sql)
+    
+    return render_template('empleados/inactive.html', empleados=cursor)
+
+
+@app.route('/active/<int:id>')
+def active(id):
+    conn=mysql.connect()
+    cursor=conn.cursor()
+    sql = "UPDATE empleados SET estado=1 WHERE id=%s"
+    data = (id,)
+    cursor.execute(sql, data)
+    conn.commit()
+    return redirect('/ina_emp')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
