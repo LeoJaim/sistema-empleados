@@ -31,7 +31,7 @@ def index():
     conn=mysql.connect()
     cursor=conn.cursor()
     
-    sql = "SELECT id,nombre,correo,foto FROM empleados"
+    sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1"
     cursor.execute(sql)
     
     return render_template('empleados/index.html', empleados=cursor)
@@ -45,6 +45,7 @@ def create():
     _nombre = request.form['nombre']
     _correo = request.form['correo']
     _foto = request.files['foto']
+    _estado = True
     now = datetime.now()
     tiempo = now.strftime("%Y%H%M%S")
     if _foto.filename != '':
@@ -54,8 +55,8 @@ def create():
     
     conn=mysql.connect()
     cursor=conn.cursor()
-    sql = "INSERT INTO empleados (id,nombre,correo,foto) VALUES (NULL,%s,%s,%s)"
-    data = (_nombre,_correo,newNamePhoto)
+    sql = "INSERT INTO empleados (id,nombre,correo,foto,estado) VALUES (NULL,%s,%s,%s,%s)"
+    data = (_nombre,_correo,newNamePhoto,_estado)
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/')    
@@ -77,12 +78,13 @@ def update():
     _nombre = request.form['nombre']
     _correo = request.form['email']
     _foto = request.files['foto']
+    _estado = request.form['estado']
     id = request.form['id']
     conn = mysql.connect()
     cursor = conn.cursor()
     #Actualizo todos los datos menos la foto
-    sql = "UPDATE empleados SET nombre=%s,correo=%s WHERE id=%s"
-    data = (_nombre,_correo,id)
+    sql = "UPDATE empleados SET nombre=%s,correo=%s,estado=%s WHERE id=%s"
+    data = (_nombre,_correo,id,_estado)
     cursor.execute(sql, data)
     conn.commit()
     #Trato la foto específicamente
@@ -116,6 +118,15 @@ def delete(id):
             flash('No se pudo borrar la foto o no tenía foto el empleado')
     else:
         flash('No tenía foto el empleado')
+    cursor.execute(sql, data)
+    conn.commit()
+    return redirect('/')
+@app.route('/inactive/<int:id>')
+def inactive(id):
+    conn=mysql.connect()
+    cursor=conn.cursor()
+    sql = "UPDATE empleados SET estado=0 WHERE id=%s"
+    data = (id,)
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/')
