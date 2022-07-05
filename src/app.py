@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import render_template,request,redirect,url_for
 from flask import send_from_directory,flash
-#from sqlite3 import Cursor
 from flaskext.mysql import MySQL
 from datetime import datetime 
 import os
@@ -21,12 +20,12 @@ app.config['MYSQL_DATABASE_DB'] = 'empleados'
 #Inicializo la conexion a la base de datos
 mysql.init_app(app)
 
-CARPETA = os.path.join('uploads')
-app.config['CARPETA']=CARPETA
+UPLOADS = os.path.join('src/uploads')
+app.config['UPLOADS']=UPLOADS
 
-@app.route('/uploads/<nombreFoto>', methods=['GET'],endpoint='uploads')
+@app.route('/fotousuario/<path:nombreFoto>', methods=['GET'],endpoint='uploads')
 def uploads(nombreFoto):
-    return send_from_directory(app.config['CARPETA'], nombreFoto)
+    return send_from_directory(os.path.join('uploads'), nombreFoto) #os.path.join('uploads')
 @app.route('/')
 def index():
     conn=mysql.connect()
@@ -50,7 +49,7 @@ def create():
     tiempo = now.strftime("%Y%H%M%S")
     if _foto.filename != '':
         newNamePhoto = tiempo + _foto.filename
-        _foto.save("uploads/" + newNamePhoto)
+        _foto.save("src/uploads/" + newNamePhoto)
     else: newNamePhoto = 'default.jpg'
     
     conn=mysql.connect()
@@ -87,15 +86,16 @@ def update():
     cursor.execute(sql, data)
     conn.commit()
     #Trato la foto específicamente
-    now = datetime.now()
-    tiempo = now.strftime("%Y%H%M%S")
+    
     if _foto.filename != '':
+        now = datetime.now()
+        tiempo = now.strftime("%Y%H%M%S")
         nuevoNombreFoto = tiempo + _foto.filename
-        _foto.save("uploads/" + nuevoNombreFoto)
+        _foto.save("src/uploads/" + nuevoNombreFoto)
         cursor.execute("SELECT foto FROM empleados WHERE id=%s", id)
         row = cursor.fetchall()
         if row[0][0] != 'default.jpg':
-            os.remove(os.path.join(app.config['CARPETA'], row[0][0]))
+            os.remove(os.path.join(app.config['UPLOADS'], row[0][0]))
         cursor.execute("UPDATE empleados SET foto=%s WHERE id=%s", (nuevoNombreFoto, id))
         conn.commit()
     return redirect('/')
@@ -111,7 +111,7 @@ def delete(id):
     row = cursor.fetchall()
     if row[0][0] != "default.jpg":
         try: 
-            os.remove(os.path.join(app.config['CARPETA'], row[0][0]))
+            os.remove(os.path.join(app.config['UPLOADS'], row[0][0]))
         except:
             flash('No se pudo borrar la foto o no tenía foto el empleado')
     else:
