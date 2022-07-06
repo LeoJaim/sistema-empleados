@@ -3,6 +3,7 @@ from flask import render_template,request,redirect,url_for
 from flask import send_from_directory,flash
 from flaskext.mysql import MySQL
 from datetime import datetime 
+import Funciones
 import os
 
 
@@ -39,8 +40,6 @@ def index():
 @app.route('/alta_emp')
 def alta_emp():
     return render_template('empleados/create.html')
-
-
 
 @app.route('/create', methods=['POST'])
 def create():
