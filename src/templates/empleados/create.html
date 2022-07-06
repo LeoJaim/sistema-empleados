@@ -1,4 +1,6 @@
 {% include 'header.html'%}
+{% extends "error.html" %}
+{% block body %}               
        <form method="post" action="/create" enctype = "multipart/form-data">
            <div class="form-group">
                <label>Nombre</label>
@@ -13,8 +15,9 @@
                <input type="file" class="form-control" name="foto">
                <br>
                <br>
-               <br>
-               <!--img src="" alt=""-->
+               <br>                 <!--img src="" alt=""-->
            </div>
+           
            <button type="submit" class="btn btn-primary">Guardar Empleado</button>
+{% endblock %}  
 {%include 'footer.html'%}

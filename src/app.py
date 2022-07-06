@@ -48,20 +48,24 @@ def create():
     _correo = request.form['correo']
     _foto = request.files['foto']
     _estado = True
-    now = datetime.now()
-    tiempo = now.strftime("%Y%H%M%S")
-    if _foto.filename != '':
-        newNamePhoto = tiempo + _foto.filename
-        _foto.save("src/uploads/" + newNamePhoto)
-    else: newNamePhoto = 'default.jpg'
-    
-    conn=mysql.connect()
-    cursor=conn.cursor()
-    sql = "INSERT INTO empleados (id,nombre,correo,foto,estado) VALUES (NULL,%s,%s,%s,%s)"
-    data = (_nombre,_correo,newNamePhoto,_estado)
-    cursor.execute(sql, data)
-    conn.commit()
-    return redirect('/')    
+    #Validaciones
+    if _nombre == "" or _correo == "" or _foto == "":
+        flash('Todos los campos son obligatorios')
+        return redirect(url_for('alta_emp'))
+    else:
+        now = datetime.now()
+        tiempo = now.strftime("%Y%H%M%S")
+        if _foto.filename != '':
+            newNamePhoto = tiempo + _foto.filename
+            _foto.save("src/uploads/" + newNamePhoto)
+        else: newNamePhoto = 'default.jpg'
+        conn=mysql.connect()
+        cursor=conn.cursor()
+        sql = "INSERT INTO empleados (id,nombre,correo,foto,estado) VALUES (NULL,%s,%s,%s,%s)"
+        data = (_nombre,_correo,newNamePhoto,_estado)
+        cursor.execute(sql, data)
+        conn.commit()
+        return redirect('/')    
 
 @app.route('/edit/<int:id>')
 def edit(id):
