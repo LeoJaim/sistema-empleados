@@ -185,7 +185,7 @@ def inactive_emp():
     
     return render_template('empleados/inactive.html', empleados=cursor)
 
-
+#############################################################################################################################
 @app.route('/active/<int:id>')
 def active(id):
     conn=mysql.connect()
@@ -195,7 +195,7 @@ def active(id):
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/ina_emp')
-
+#############################################################################################################################
 @app.route('/dup/<int:id>')
 def dup(id):
     conn=mysql.connect()
@@ -206,14 +206,13 @@ def dup(id):
     cursor.execute(sql, data)
     empleados = cursor.fetchall()
     return render_template('empleados/duplica.html', empleados=empleados)
-
+#############################################################################################################################
 @app.route('/dpl_emp', methods=['POST'])
 def duplica():
     _nombre = request.form['nombre']
     _correo = request.form['email']
     _foto = request.files['foto']
     _estado = True
-    print(_nombre,_correo,_foto,_estado)
     #Validaciones
     if _nombre == "" or _correo == "" or _foto == "":
         flash('Todos los campos son obligatorios')
@@ -232,6 +231,16 @@ def duplica():
         cursor.execute(sql, data)
         conn.commit()
         return redirect('/0')    
+
+@app.route('/deta/<int:id>')
+def detalle(id):
+    conn=mysql.connect()
+    cursor=conn.cursor()
+    sql = "SELECT id,nombre,correo,foto FROM empleados where id=%s"
+    data=(id,)
+    cursor.execute(sql,data)
+    empleados = cursor.fetchall()
+    return render_template('empleados/detalle.html', empleados=empleados)
 
 
 if __name__ == '__main__':
