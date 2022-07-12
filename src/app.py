@@ -44,10 +44,21 @@ app.config['UPLOADS']=UPLOADS
 @app.route('/fotousuario/<path:nombreFoto>', methods=['GET'],endpoint='uploads')
 def uploads(nombreFoto):
     return send_from_directory(os.path.join('uploads'), nombreFoto) #os.path.join('uploads')
-@app.route('/<int:ord>', methods=['GET'])
-def index(ord):
+
+@app.route('/', methods=['GET'])
+def index():
     conn=mysql.connect()
     cursor=conn.cursor()
+    sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1 order by id"
+    cursor.execute(sql)    
+    return render_template('empleados/index.html', empleados=cursor)
+
+
+@app.route('/<int:ord>', methods=['GET'])
+def index_o(ord):
+    conn=mysql.connect()
+    cursor=conn.cursor()
+    if ord == "": ord == 4
     if ord == 1 :
         sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1 order by nombre,id"
     elif ord == 2:
@@ -88,7 +99,7 @@ def create():
         data = (_nombre,_correo,newNamePhoto,_estado)
         cursor.execute(sql, data)
         conn.commit()
-        return redirect('/')    
+        return redirect('/0')    
 
 @app.route('/edit/<int:id>')
 def edit(id):
@@ -128,7 +139,7 @@ def update():
             os.remove(os.path.join(app.config['UPLOADS'], row[0][0]))
         cursor.execute("UPDATE empleados SET foto=%s WHERE id=%s", (nuevoNombreFoto, id))
         conn.commit()
-    return redirect('/')
+    return redirect('/0')
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -137,8 +148,9 @@ def delete(id):
     sql = "DELETE FROM empleados WHERE id=%s"
     data = (id,)
     #Borro la foto
-    cursor.execute("SELECT foto FROM empleados WHERE id=%s", id)
+    cursor.execute("SELECT foto,estado FROM empleados WHERE id=%s", id)
     row = cursor.fetchall()
+    emp_estado = row[0][1]
     if row[0][0] != "default.jpg":
         try: 
             os.remove(os.path.join(app.config['UPLOADS'], row[0][0]))
@@ -148,7 +160,11 @@ def delete(id):
         flash('No tenía foto el empleado')
     cursor.execute(sql, data)
     conn.commit()
-    return redirect('/')
+    if  emp_estado == 1:
+        return redirect('/0')
+    else:
+        return redirect('/ina_emp')
+
 @app.route('/inactive/<int:id>')
 def inactive(id):
     conn=mysql.connect()
@@ -157,7 +173,7 @@ def inactive(id):
     data = (id,)
     cursor.execute(sql, data)
     conn.commit()
-    return redirect('/')
+    return redirect('/0')
 
 @app.route('/ina_emp')
 def inactive_emp():
@@ -179,6 +195,43 @@ def active(id):
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/ina_emp')
+
+@app.route('/dup/<int:id>')
+def dup(id):
+    conn=mysql.connect()
+    cursor=conn.cursor()
+    
+    sql = "SELECT id,nombre,correo,foto FROM empleados WHERE id=%s"
+    data = (id,)
+    cursor.execute(sql, data)
+    empleados = cursor.fetchall()
+    return render_template('empleados/duplica.html', empleados=empleados)
+
+@app.route('/dpl_emp', methods=['POST'])
+def duplica():
+    _nombre = request.form['nombre']
+    _correo = request.form['email']
+    _foto = request.files['foto']
+    _estado = True
+    print(_nombre,_correo,_foto,_estado)
+    #Validaciones
+    if _nombre == "" or _correo == "" or _foto == "":
+        flash('Todos los campos son obligatorios')
+        return redirect(url_for('alta_emp'))
+    else:
+        now = datetime.now()
+        tiempo = now.strftime("%Y%H%M%S")
+        if _foto.filename != '':
+            newNamePhoto = tiempo + _foto.filename
+            _foto.save("src/uploads/" + newNamePhoto)
+        else: newNamePhoto = 'default.jpg'
+        conn=mysql.connect()
+        cursor=conn.cursor()
+        sql = "INSERT INTO empleados (id,nombre,correo,foto,estado) VALUES (NULL,%s,%s,%s,%s)"
+        data = (_nombre,_correo,newNamePhoto,bool(_estado))
+        cursor.execute(sql, data)
+        conn.commit()
+        return redirect('/0')    
 
 
 if __name__ == '__main__':

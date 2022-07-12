@@ -23,7 +23,7 @@
                         <td> 
                             <img class="img-thumbnail" width="100" src="{{url_for('uploads',nombreFoto=empleado[3])}}" alt="">
                         </td>
-                        <td><a class = "btn btn-warning" href= "/edit/{{empleado[0]}}">Editar</a>  <a class = "btn btn-danger" href= "/delete/{{empleado[0]}}"> Borrar</a> <a class = "btn btn-secondary" href= "/inactive/{{empleado[0]}}"> Inactiva</a></td>
+                        <td><a class = "btn btn-warning" href= "/edit/{{empleado[0]}}">Editar</a>  <a class = "btn btn-danger" href= "/delete/{{empleado[0]}}"> Borrar</a> <a class = "btn btn-secondary" href= "/inactive/{{empleado[0]}}"> Inactiva</a> <a class = "btn btn-secondary" href= "/dup/{{empleado[0]}}"> Duplica</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
