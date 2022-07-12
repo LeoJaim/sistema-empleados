@@ -2,10 +2,9 @@ from flaskext.mysql import MySQL
 
 #########################################################################################
 #Funciones para la conexion a la base de datos
-def crear_conexion(conexion=None,cursor=None,mysql=None):
+def crear_conexion(mysql=None):
     conexion = mysql.connect()
     cursor = conexion.cursor()
-    return conexion, cursor
 
 def cerrar_conexion(conexion, cursor):
     cursor.close()

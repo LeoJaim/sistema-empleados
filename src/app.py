@@ -3,7 +3,7 @@ from flask import render_template,request,redirect,url_for
 from flask import send_from_directory,flash
 from flaskext.mysql import MySQL
 from datetime import datetime 
-import Funciones
+import Funciones as f
 import os
 
 
@@ -21,20 +21,44 @@ app.config['MYSQL_DATABASE_DB'] = 'empleados'
 #Inicializo la conexion a la base de datos
 mysql.init_app(app)
 
+#########################################################################################
+#Funciones para la conexion a la base de datos
+def crear_conexion():
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+
+def cerrar_conexion(cursor, conexion):
+    cursor.close()
+    conexion.close()
+
+def ejecutar_query(cursor,conexion, query, args=None):
+    #conexion, cursor = crear_conexion()
+    cursor.execute(query, args)
+    conexion.commit()
+#########################################################################################
+
+
 UPLOADS = os.path.join('src/uploads')
 app.config['UPLOADS']=UPLOADS
 
 @app.route('/fotousuario/<path:nombreFoto>', methods=['GET'],endpoint='uploads')
 def uploads(nombreFoto):
     return send_from_directory(os.path.join('uploads'), nombreFoto) #os.path.join('uploads')
-@app.route('/')
-def index():
+@app.route('/<int:ord>', methods=['GET'])
+def index(ord):
     conn=mysql.connect()
     cursor=conn.cursor()
+    if ord == 1 :
+        sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1 order by nombre,id"
+    elif ord == 2:
+        sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1 order by id,nombre"
+    elif ord == 0:
+        sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1 order by id"
+    else:
+        sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1"
     
-    sql = "SELECT id,nombre,correo,foto FROM empleados where estado=1"
     cursor.execute(sql)
-    
+        
     return render_template('empleados/index.html', empleados=cursor)
 
 @app.route('/alta_emp')
@@ -93,7 +117,6 @@ def update():
     cursor.execute(sql, data)
     conn.commit()
     #Trato la foto específicamente
-    
     if _foto.filename != '':
         now = datetime.now()
         tiempo = now.strftime("%Y%H%M%S")
@@ -135,7 +158,6 @@ def inactive(id):
     cursor.execute(sql, data)
     conn.commit()
     return redirect('/')
-
 
 @app.route('/ina_emp')
 def inactive_emp():
