@@ -5,7 +5,6 @@ from flaskext.mysql import MySQL
 from datetime import datetime 
 import os
 
-
 app = Flask(__name__)
 
 app.secret_key = 'super secret key'
@@ -17,10 +16,13 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'Minolta10*'
 app.config['MYSQL_DATABASE_DB'] = 'empleados'
+
+
 #Inicializo la conexion a la base de datos
 mysql.init_app(app)
 
-UPLOADS = os.path.join('src/uploads')
+
+UPLOADS = os.path.join('../src/uploads/')
 app.config['UPLOADS']=UPLOADS
 
 @app.route('/fotousuario/<path:nombreFoto>', methods=['GET'],endpoint='uploads')
@@ -49,7 +51,8 @@ def create():
     tiempo = now.strftime("%Y%H%M%S")
     if _foto.filename != '':
         newNamePhoto = tiempo + _foto.filename
-        _foto.save("src/uploads/" + newNamePhoto)
+        #_foto.save("src/uploads" + newNamePhoto)
+        _foto.save(UPLOADS + newNamePhoto)
     else: newNamePhoto = 'default.jpg'
     
     conn=mysql.connect()
@@ -91,7 +94,8 @@ def update():
         now = datetime.now()
         tiempo = now.strftime("%Y%H%M%S")
         nuevoNombreFoto = tiempo + _foto.filename
-        _foto.save("src/uploads/" + nuevoNombreFoto)
+        #_foto.save("src/uploads/" + nuevoNombreFoto)
+        _foto.save(UPLOADS + nuevoNombreFoto)
         cursor.execute("SELECT foto FROM empleados WHERE id=%s", id)
         row = cursor.fetchall()
         if row[0][0] != 'default.jpg':
