@@ -22,7 +22,7 @@ app.config['MYSQL_DATABASE_DB'] = 'empleados'
 mysql.init_app(app)
 
 
-UPLOADS = os.path.join('../src/uploads/')
+UPLOADS = os.path.join('src/uploads/')
 app.config['UPLOADS']=UPLOADS
 
 @app.route('/fotousuario/<path:nombreFoto>', methods=['GET'],endpoint='uploads')
